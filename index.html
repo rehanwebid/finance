@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLoop - Personal Finance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            background-color: #0f0f0f;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .sidebar::-webkit-scrollbar { display: none; }
+
+        .brand {
+            padding: 28px 24px;
+            margin: 12px 8px 24px;
+            color: #ffffff;
+        }
+        .brand .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .brand .logo-icon {
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+        }
+        .brand .logo-icon svg { width: 100%; height: 100%; }
+        .brand .title {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .brand .title .fin {
+            background: linear-gradient(135deg, #ffffff 0%, #c0c0c0 30%, #e8e8e8 50%, #a0a0a0 70%, #d0d0d0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .brand .title .loop { color: #FBBF24; }
+        .brand .tagline {
+            display: block;
+            font-size: 11px;
+            font-weight: 400;
+            color: #a0a0a0;
+            margin-top: 6px;
+        }
+
+        .menu-section { padding: 14px 16px; }
+        .menu-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #a0a0a0;
+            padding: 0 8px 6px;
+            margin-bottom: 10px;
+            border-bottom: 1.5px solid rgba(255,255,255,0.08);
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #b0b0b0;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .menu-item:hover {
+            background-color: rgba(255,255,255,0.06);
+            color: #ffffff;
+        }
+        .menu-item.active {
+            background-color: rgba(255,255,255,0.08);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .menu-item .icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-item .icon svg { width: 100%; height: 100%; }
+        .menu-item .badge {
+            margin-left: auto;
+            background-color: #EF4444;
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .menu-item .chevron {
+            margin-left: auto;
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-item .chevron svg { width: 100%; height: 100%; }
+        .menu-item.expanded .chevron { transform: rotate(180deg); }
+
+        .submenu {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .submenu.collapsed { max-height: 0; }
+        .submenu.expanded { max-height: 300px; }
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 9px 14px 9px 48px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 400;
+            color: #909090;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .submenu-item:hover {
+            background-color: rgba(255,255,255,0.04);
+            color: #d0d0d0;
+        }
+        .submenu-item.active {
+            color: #FBBF24;
+            font-weight: 500;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: rgba(255,255,255,0.06);
+            margin: 8px 16px;
+        }
+        .spacer { flex: 1; }
+
+        .bottom-section { padding: 8px 16px 20px; }
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background-color: rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .user-mini:hover { background-color: rgba(255,255,255,0.08); }
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .user-info .name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        .user-info .email {
+            font-size: 11px;
+            color: #909090;
+        }
+        .logout-icon {
+            margin-left: auto;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .logout-icon svg { width: 100%; height: 100%; }
+        .logout-icon:hover { opacity: 0.7; }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+            background-color: #0f0f0f;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ========== SHARED STYLES ========== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 32px;
+        }
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .page-header p { font-size: 14px; color: #888; }
+        
+        .btn-add {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background-color: #FBBF24;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-add:hover {
+            background-color: #F59E0B;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+        .btn-add .btn-icon { width: 18px; height: 18px; }
+
+        .card {
+            background-color: #1a1a1a;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #262626;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            border-color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .card-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-icon.green { background-color: rgba(5, 150, 105, 0.15); color: #34D399; }
+        .card-icon.blue { background-color: rgba(37, 99, 235, 0.15); color: #60A5FA; }
+        .card-icon.red { background-color: rgba(220, 38, 38, 0.15); color: #F87171; }
+        .card-icon svg { width: 18px; height: 18px; }
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+        .card-change {
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-change.up { color: #34D399; }
+        .card-change.down { color: #F87171; }
+
+        /* ========== DASHBOARD STYLES ========== */
+        .dashboard-header { margin-bottom: 32px; }
+        .greeting h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+        .greeting p { font-size: 14px; color: #888; }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+        }
+        .chart-card, .recent-card {
+            background-color: #1a1a1a;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #262626;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title .title-icon { width: 20px; height: 20px; }
+        .card-title .title-icon svg { width: 100%; height: 100%; }
+
+        .chart-wrapper { display: flex; flex-direction: column; height: 220px; }
+        .chart-bars-area {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            padding: 0 0 8px 0;
+        }
+        .chart-bar-col {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            height: 100%;
+            position: relative;
+        }
+        .chart-bar-inner {
+            width: 100%;
+            max-width: 44px;
+            background: linear-gradient(180deg, #FBBF24 0%, #F59E0B 100%);
+            border-radius: 8px 8px 0 0;
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            align-self: flex-end;
+        }
+        .chart-bar-inner:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+        .chart-bar-value {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 600;
+            color: #FBBF24;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+        .chart-bar-inner:hover .chart-bar-value { opacity: 1; }
+        .chart-labels {
+            display: flex;
+            gap: 20px;
+            padding-top: 8px;
+            border-top: 1px solid #262626;
+        }
+        .chart-label-item {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .transaction-item-dashboard {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #262626;
+        }
+        .transaction-item-dashboard:last-child { border-bottom: none; }
+        .transaction-info { flex: 1; }
+        .transaction-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        .transaction-date {
+            font-size: 11px;
+            color: #777;
+            margin-top: 2px;
+        }
+        .transaction-amount {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: right;
+        }
+        .transaction-amount.income { color: #34D399; }
+        .transaction-amount.expense { color: #F87171; }
+
+        /* ========== TRANSAKSI STYLES ========== */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: transparent;
+            color: #888;
+            border: 1px solid #262626;
+            user-select: none;
+        }
+        .filter-tab:hover { color: #ffffff; border-color: #444; }
+        .filter-tab.active {
+            background-color: #FBBF24;
+            color: #1a1a1a;
+            border-color: #FBBF24;
+            font-weight: 600;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background-color: #1a1a1a;
+            border: 1px solid #262626;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-input:focus { border-color: #FBBF24; }
+        .search-input::placeholder { color: #666; }
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #666;
+            pointer-events: none;
+        }
+        .filter-select {
+            padding: 12px 16px;
+            background-color: #1a1a1a;
+            border: 1px solid #262626;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            min-width: 140px;
+            appearance: auto;
+        }
+        .filter-select:focus { border-color: #FBBF24; }
+        .filter-select option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .transaction-table-card {
+            background-color: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid #262626;
+            overflow: hidden;
+        }
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 120px 140px 100px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #262626;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+        }
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 140px 100px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #262626;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .table-row:last-child { border-bottom: none; }
+        .table-row:hover { background-color: rgba(255,255,255,0.02); }
+        .transaction-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .transaction-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .transaction-dot.income { background-color: #34D399; }
+        .transaction-dot.expense { background-color: #F87171; }
+        .transaction-detail .name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        .transaction-detail .category {
+            font-size: 11px;
+            color: #777;
+            margin-top: 2px;
+        }
+        .transaction-date-cell { font-size: 13px; color: #999; }
+        .transaction-category-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            background-color: rgba(255,255,255,0.05);
+            color: #b0b0b0;
+        }
+        .transaction-amount-cell {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: right;
+        }
+        .transaction-amount-cell.income { color: #34D399; }
+        .transaction-amount-cell.expense { color: #F87171; }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 14px;
+        }
+        .result-count {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        /* ========== RIWAYAT BULANAN STYLES ========== */
+        .year-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .year-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid #262626;
+            background-color: #1a1a1a;
+            color: #b0b0b0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .year-btn:hover {
+            border-color: #FBBF24;
+            color: #FBBF24;
+        }
+        .year-display {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .month-card {
+            background-color: #1a1a1a;
+            border: 1px solid #262626;
+            border-radius: 14px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .month-card:hover {
+            border-color: #444;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .month-card.selected {
+            border-color: #FBBF24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
+        }
+        .month-card .month-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .month-card .month-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .month-card .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+        .month-card .summary-label {
+            color: #777;
+        }
+        .month-card .summary-value {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        .month-card .summary-value.income { color: #34D399; }
+        .month-card .summary-value.expense { color: #F87171; }
+        .month-card .month-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 30px 30px 0;
+            border-color: transparent #FBBF24 transparent transparent;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .month-card.has-data .month-indicator {
+            opacity: 1;
+        }
+
+        .detail-section {
+            background-color: #1a1a1a;
+            border: 1px solid #262626;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .detail-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .detail-summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .detail-summary-card {
+            background-color: #0f0f0f;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #262626;
+        }
+        .detail-summary-card .label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .detail-summary-card .value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .detail-summary-card .value.income { color: #34D399; }
+        .detail-summary-card .value.expense { color: #F87171; }
+
+        @media (max-width: 1200px) {
+            .month-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-top">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="8" stroke="#FBBF24" stroke-width="2"/>
+                        <path d="M12 8V12L15 15" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="8" cy="4" r="2" fill="#FBBF24"/>
+                        <circle cx="18" cy="20" r="2" fill="#C0C0C0"/>
+                    </svg>
+                </div>
+                <div class="title">
+                    <span class="fin">Fin</span><span class="loop">Loop</span>
+                </div>
+            </div>
+            <span class="tagline">Your Personal Finance Loop</span>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-label">Menu Utama</div>
+            <a class="menu-item" onclick="navigateTo('dashboard', this)">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </span>
+                Dashboard
+            </a>
+            
+            <div>
+                <a class="menu-item" onclick="toggleSubmenu(this, 'submenu-transaksi')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    Transaksi
+                    <span class="chevron">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </a>
+                <div class="submenu collapsed" id="submenu-transaksi">
+                    <a class="submenu-item" onclick="navigateTo('transaksi', this, 'semua')">Semua Transaksi</a>
+                    <a class="submenu-item" onclick="navigateTo('transaksi', this, 'pemasukan')">Pemasukan</a>
+                    <a class="submenu-item" onclick="navigateTo('transaksi', this, 'pengeluaran')">Pengeluaran</a>
+                </div>
+            </div>
+
+            <a class="menu-item active" onclick="navigateTo('riwayat', this)">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M8 2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M3 10H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </span>
+                Riwayat Bulanan
+            </a>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-label">Alat Keuangan</div>
+            <div>
+                <a class="menu-item" onclick="toggleSubmenu(this, 'submenu-budgeting')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </span>
+                    Budgeting
+                    <span class="chevron">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </a>
+                <div class="submenu collapsed" id="submenu-budgeting">
+                    <a class="submenu-item">Target Tabungan</a>
+                    <a class="submenu-item">Limit Pengeluaran</a>
+                </div>
+            </div>
+            <div>
+                <a class="menu-item" onclick="toggleSubmenu(this, 'submenu-laporan')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 20L9 14L13 18L21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 6H21V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    Laporan & Grafik
+                    <span class="chevron">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </a>
+                <div class="submenu collapsed" id="submenu-laporan">
+                    <a class="submenu-item">Grafik Bulanan</a>
+                    <a class="submenu-item">Grafik Tahunan</a>
+                    <a class="submenu-item">Perbandingan</a>
+                </div>
+            </div>
+            <div>
+                <a class="menu-item" onclick="toggleSubmenu(this, 'submenu-kategori')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.59 13.41L13.42 20.58C13.2343 20.766 13.0137 20.9135 12.7709 21.014C12.5281 21.1144 12.2678 21.166 12.005 21.166C11.7422 21.166 11.4819 21.1144 11.2391 21.014C10.9963 20.9135 10.7757 20.766 10.59 20.58L2 12V2H12L20.59 10.59C20.9625 10.9647 21.1716 11.4716 21.1716 12C21.1716 12.5284 20.9625 13.0353 20.59 13.41Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    Kategori
+                    <span class="chevron">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </a>
+                <div class="submenu collapsed" id="submenu-kategori">
+                    <a class="submenu-item">Manage Kategori</a>
+                    <a class="submenu-item">Statistik per Kategori</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="menu-section">
+            <div class="menu-label">Info & Sistem</div>
+            <a class="menu-item">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                Notifikasi
+            </a>
+            <a class="menu-item">
+                <span class="icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M19.4 15C19.2663 15.3016 19.2272 15.6362 19.288 15.9606C19.3487 16.2849 19.5066 16.5843 19.74 16.82L19.79 16.87C19.9762 17.0563 20.1235 17.2785 20.2235 17.5238C20.3235 17.7691 20.3743 18.0327 20.373 18.2985C20.3718 18.5642 20.3186 18.8272 20.2165 19.0715C20.1144 19.3159 19.9653 19.5366 19.778 19.721C19.5906 19.9055 19.3687 20.0501 19.1249 20.1464C18.8811 20.2427 18.6204 20.2889 18.3584 20.2825C18.0965 20.2761 17.8385 20.2172 17.5996 20.1091C17.3608 20.001 17.1463 19.8458 16.969 19.653L16.92 19.6C16.6843 19.3666 16.3849 19.2087 16.0606 19.148C15.7362 19.0872 15.4016 19.1263 15.1 19.26C14.8039 19.3879 14.5523 19.5979 14.3744 19.8652C14.1964 20.1325 14.0998 20.4454 14.096 20.766V21C14.096 21.5304 13.8853 22.0391 13.5102 22.4142C13.1351 22.7893 12.6264 23 12.096 23C11.5656 23 11.0569 22.7893 10.6818 22.4142C10.3067 22.0391 10.096 21.5304 10.096 21V20.86C10.0876 20.5345 9.98055 20.2193 9.78895 19.9535C9.59735 19.6877 9.32986 19.4828 9.02 19.364C8.71837 19.2303 8.38384 19.1912 8.05951 19.252C7.73518 19.3127 7.43579 19.4706 7.2 19.704L7.15 19.754C6.96375 19.9403 6.74152 20.0876 6.49622 20.1876C6.25092 20.2876 5.98731 20.3384 5.72152 20.3371C5.45574 20.3358 5.19281 20.2827 4.94848 20.1806C4.70415 20.0785 4.48343 19.9293 4.299 19.742C4.11456 19.5547 3.97003 19.3327 3.8737 19.089C3.77737 18.8452 3.73113 18.5845 3.73754 18.3225C3.74394 18.0605 3.80277 17.8025 3.91093 17.5637C4.01909 17.3249 4.17426 17.1104 4.367 16.933L4.42 16.884C4.65336 16.6483 4.81129 16.3489 4.872 16.0246C4.93281 15.7002 4.89366 15.3656 4.76 15.064C4.63214 14.7679 4.42212 14.5163 4.15484 14.3384C3.88756 14.1604 3.57461 14.0638 3.254 14.06H3C2.46957 14.06 1.96086 13.8493 1.58579 13.4742C1.21071 13.0991 1 12.5904 1 12.06C1 11.5296 1.21071 11.0209 1.58579 10.6458C1.96086 10.2707 2.46957 10.06 3 10.06H3.09C3.41553 10.0516 3.73072 9.94455 3.9965 9.75295C4.26229 9.56135 4.46717 9.29386 4.586 8.984C4.71966 8.68237 4.75881 8.34784 4.698 8.02351C4.63729 7.69918 4.47936 7.39979 4.246 7.164L4.196 7.114C4.00975 6.92775 3.86244 6.70552 3.76244 6.46022C3.66244 6.21492 3.61156 5.95131 3.61287 5.68552C3.61417 5.41974 3.66734 5.15681 3.76942 4.91248C3.8715 4.66815 4.02066 4.44743 4.208 4.263C4.39534 4.07856 4.61727 3.93403 4.86103 3.8377C5.10479 3.74137 5.36552 3.69513 5.62752 3.70154C5.88953 3.70794 6.14748 3.76677 6.38632 3.87493C6.62516 3.98309 6.83965 4.13826 7.017 4.331L7.066 4.384C7.30169 4.61736 7.60107 4.77529 7.9254 4.836C8.24973 4.89681 8.58436 4.85766 8.886 4.724V4.724C9.18215 4.59614 9.43367 4.38612 9.61163 4.11884C9.78959 3.85156 9.88622 3.53861 9.89 3.218V3C9.89 2.46957 10.1007 1.96086 10.4758 1.58579C10.8509 1.21071 11.3596 1 11.89 1C12.4204 1 12.9291 1.21071 13.3042 1.58579C13.6793 1.96086 13.89 2.46957 13.89 3V3.14C13.8938 3.46178 13.9881 3.77625 14.1612 4.04718C14.3343 4.31811 14.5789 4.53435 14.866 4.67C15.1676 4.80366 15.5022 4.84281 15.8265 4.782C16.1508 4.72129 16.4502 4.56336 16.686 4.33L16.736 4.28C16.9223 4.09375 17.1445 3.94644 17.3898 3.84644C17.6351 3.74644 17.8987 3.69556 18.1645 3.69687C18.4303 3.69817 18.6932 3.75134 18.9375 3.85342C19.1819 3.9555 19.4026 4.10466 19.587 4.292C19.7714 4.47934 19.916 4.70127 20.0123 4.94503C20.1086 5.18879 20.1549 5.44952 20.1485 5.71152C20.1421 5.97353 20.0832 6.23148 19.9751 6.47032C19.8669 6.70916 19.7117 6.92365 19.519 7.101L19.466 7.15C19.2326 7.38569 19.0747 7.68507 19.014 8.0094C18.9532 8.33373 18.9923 8.66836 19.126 8.97V8.97C19.2539 9.26615 19.4639 9.51767 19.7312 9.69563C19.9985 9.87359 20.3114 9.97022 20.632 9.974H20.89C21.4204 9.974 21.9291 10.1847 22.3042 10.5598C22.6793 10.9349 22.89 11.4436 22.89 11.974C22.89 12.5044 22.6793 13.0131 22.3042 13.3882C21.9291 13.7633 21.4204 13.974 20.89 13.974H20.806C20.4842 13.9778 20.1698 14.0721 19.8988 14.2452C19.6279 14.4183 19.4117 14.6629 19.276 14.95L19.276 14.95C19.1423 15.2516 19.1032 15.5862 19.164 15.9105C19.2247 16.2348 19.3826 16.5342 19.616 16.77L19.666 16.82" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                Pengaturan
+            </a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="menu-section">
+            <div class="menu-label">Account</div>
+            <div class="user-mini">
+                <div class="avatar">B</div>
+                <div class="user-info">
+                    <div class="name">Budi Santoso</div>
+                    <div class="email">budi@email.com</div>
+                </div>
+                <div class="logout-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M16 17L21 12L16 7" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12H9" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+
+        <!-- ========== DASHBOARD PAGE ========== -->
+        <div class="page" id="page-dashboard">
+            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div class="greeting">
+                    <h1>Selamat Datang, Budi 👋</h1>
+                    <p>Ringkasan keuangan kamu hari ini</p>
+                </div>
+                <button class="btn-add">
+                    <span class="btn-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    Tambah Transaksi
+                </button>
+            </div>
+            <div class="summary-cards">
+                <div class="card"><div class="card-label"><div class="card-icon green"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 6V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 10L12 6L16 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Total Saldo</div><div class="card-value">Rp 12.500.000</div><div class="card-change up">↑ 12.5% dari bulan lalu</div></div>
+                <div class="card"><div class="card-label"><div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 18V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 14L12 18L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Pemasukan</div><div class="card-value">Rp 8.200.000</div><div class="card-change up">↑ 8.2% dari bulan lalu</div></div>
+                <div class="card"><div class="card-label"><div class="card-icon red"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 6V18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 14L12 18L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>Pengeluaran</div><div class="card-value">Rp 4.300.000</div><div class="card-change down">↓ 3.1% dari bulan lalu</div></div>
+            </div>
+            <div class="content-grid">
+                <div class="chart-card"><div class="card-title"><span class="title-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 20L9 14L13 18L21 6" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6H21V10" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Pengeluaran Mingguan</div><div class="chart-wrapper" id="chartWrapper"></div></div>
+                <div class="recent-card"><div class="card-title"><span class="title-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#FBBF24" stroke-width="2"/><path d="M12 6V12L16 14" stroke="#FBBF24" stroke-width="2" stroke-linecap="round"/></svg></span>Transaksi Terbaru</div><div class="transaction-list" id="dashboardRecentTransactions"></div></div>
+            </div>
+        </div>
+
+        <!-- ========== TRANSAKSI PAGE ========== -->
+        <div class="page" id="page-transaksi">
+            <div class="page-header">
+                <div><h1>Transaksi 💸</h1><p>Kelola semua pemasukan & pengeluaran kamu</p></div>
+                <button class="btn-add"><span class="btn-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Tambah Transaksi</button>
+            </div>
+            <div class="filter-tabs" id="filterTabs">
+                <div class="filter-tab active" data-filter="semua">Semua</div>
+                <div class="filter-tab" data-filter="pemasukan">Pemasukan</div>
+                <div class="filter-tab" data-filter="pengeluaran">Pengeluaran</div>
+                <div class="filter-tab" data-filter="bulan-ini">Bulan Ini</div>
+                <div class="filter-tab" data-filter="minggu-ini">Minggu Ini</div>
+            </div>
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cari transaksi...">
+                </div>
+                <select class="filter-select" id="categoryFilter">
+                    <option value="semua">Semua Kategori</option><option>Gaji</option><option>Belanja</option><option>Tagihan</option><option>Freelance</option><option>Makanan</option><option>Transportasi</option><option>Hiburan</option><option>Bonus</option>
+                </select>
+                <select class="filter-select" id="sortFilter">
+                    <option value="terbaru">Terbaru</option><option value="terlama">Terlama</option><option value="terbesar">Terbesar</option><option value="terkecil">Terkecil</option>
+                </select>
+            </div>
+            <div class="result-count" id="resultCount"></div>
+            <div class="transaction-table-card">
+                <div class="table-header"><div>Transaksi</div><div>Tanggal</div><div>Kategori</div><div style="text-align: right;">Jumlah</div></div>
+                <div class="table-body" id="transactionTableBody"></div>
+            </div>
+        </div>
+
+        <!-- ========== RIWAYAT BULANAN PAGE ========== -->
+        <div class="page active" id="page-riwayat">
+            <div class="page-header">
+                <div>
+                    <h1>Riwayat Bulanan 📅</h1>
+                    <p>Lacak keuangan kamu per bulan sepanjang tahun</p>
+                </div>
+            </div>
+
+            <!-- Year Selector -->
+            <div class="year-selector">
+                <button class="year-btn" onclick="changeYear(-1)">
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="year-display" id="yearDisplay">2026</div>
+                <button class="year-btn" onclick="changeYear(1)">
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+
+            <!-- Month Grid -->
+            <div class="month-grid" id="monthGrid"></div>
+
+            <!-- Detail Section -->
+            <div class="detail-section" id="detailSection">
+                <div class="detail-header">
+                    <div class="detail-title" id="detailTitle">Pilih bulan untuk melihat detail</div>
+                </div>
+                <div class="detail-summary-cards" id="detailSummaryCards"></div>
+                <div class="transaction-table-card">
+                    <div class="table-header"><div>Transaksi</div><div>Tanggal</div><div>Kategori</div><div style="text-align: right;">Jumlah</div></div>
+                    <div class="table-body" id="detailTransactionList"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ========== DATA ==========
+        const allTransactions = [
+            { name: 'Gaji Bulanan', category: 'PT. Maju Jaya', date: '2026-07-20', displayDate: '20 Jul 2026', type: 'pemasukan', kategori: 'Gaji', amount: 6500000, month: 7, year: 2026 },
+            { name: 'Belanja Bulanan', category: 'Supermarket', date: '2026-07-19', displayDate: '19 Jul 2026', type: 'pengeluaran', kategori: 'Belanja', amount: 850000, month: 7, year: 2026 },
+            { name: 'Listrik & Internet', category: 'PLN & Indihome', date: '2026-07-18', displayDate: '18 Jul 2026', type: 'pengeluaran', kategori: 'Tagihan', amount: 450000, month: 7, year: 2026 },
+            { name: 'Freelance Project', category: 'Web Development', date: '2026-07-17', displayDate: '17 Jul 2026', type: 'pemasukan', kategori: 'Freelance', amount: 1700000, month: 7, year: 2026 },
+            { name: 'Makan Siang', category: 'Warung Padang', date: '2026-07-17', displayDate: '17 Jul 2026', type: 'pengeluaran', kategori: 'Makanan', amount: 35000, month: 7, year: 2026 },
+            { name: 'Transport Online', category: 'Gojek', date: '2026-07-16', displayDate: '16 Jul 2026', type: 'pengeluaran', kategori: 'Transportasi', amount: 48000, month: 7, year: 2026 },
+            { name: 'Bonus Proyek', category: 'PT. Maju Jaya', date: '2026-07-15', displayDate: '15 Jul 2026', type: 'pemasukan', kategori: 'Bonus', amount: 2000000, month: 7, year: 2026 },
+            { name: 'Nonton Bioskop', category: 'XXI', date: '2026-07-14', displayDate: '14 Jul 2026', type: 'pengeluaran', kategori: 'Hiburan', amount: 75000, month: 7, year: 2026 },
+            { name: 'Gaji Bulanan', category: 'PT. Maju Jaya', date: '2026-06-20', displayDate: '20 Jun 2026', type: 'pemasukan', kategori: 'Gaji', amount: 6500000, month: 6, year: 2026 },
+            { name: 'Bayar Kost', category: 'Kost', date: '2026-06-28', displayDate: '28 Jun 2026', type: 'pengeluaran', kategori: 'Tagihan', amount: 1500000, month: 6, year: 2026 },
+            { name: 'Belanja Online', category: 'Tokopedia', date: '2026-06-15', displayDate: '15 Jun 2026', type: 'pengeluaran', kategori: 'Belanja', amount: 350000, month: 6, year: 2026 },
+            { name: 'Freelance Design', category: 'Upwork', date: '2026-06-10', displayDate: '10 Jun 2026', type: 'pemasukan', kategori: 'Freelance', amount: 2500000, month: 6, year: 2026 },
+            { name: 'Makan Malam', category: 'Restoran', date: '2026-05-25', displayDate: '25 Mei 2026', type: 'pengeluaran', kategori: 'Makanan', amount: 150000, month: 5, year: 2026 },
+            { name: 'Gaji Bulanan', category: 'PT. Maju Jaya', date: '2026-05-20', displayDate: '20 Mei 2026', type: 'pemasukan', kategori: 'Gaji', amount: 6500000, month: 5, year: 2026 },
+            { name: 'Servis Motor', category: 'Bengkel', date: '2026-05-10', displayDate: '10 Mei 2026', type: 'pengeluaran', kategori: 'Transportasi', amount: 250000, month: 5, year: 2026 },
+            { name: 'Gaji Bulanan', category: 'PT. Maju Jaya', date: '2026-04-20', displayDate: '20 Apr 2026', type: 'pemasukan', kategori: 'Gaji', amount: 6500000, month: 4, year: 2026 },
+        ];
+
+        let currentYear = 2026;
+        let selectedMonth = null;
+        const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        function formatCurrency(value) {
+            return 'Rp ' + value.toLocaleString('id-ID');
+        }
+
+        // ========== RIWAYAT BULANAN ==========
+        function getMonthData(month, year) {
+            const transactions = allTransactions.filter(t => t.month === month && t.year === year);
+            const income = transactions.filter(t => t.type === 'pemasukan').reduce((sum, t) => sum + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'pengeluaran').reduce((sum, t) => sum + t.amount, 0);
+            return { transactions, income, expense, balance: income - expense, count: transactions.length };
+        }
+
+        function renderMonthGrid() {
+            const grid = document.getElementById('monthGrid');
+            document.getElementById('yearDisplay').textContent = currentYear;
+            
+            grid.innerHTML = '';
+            for (let m = 1; m <= 12; m++) {
+                const data = getMonthData(m, currentYear);
+                const hasData = data.count > 0;
+                
+                const card = document.createElement('div');
+                card.className = 'month-card' + (hasData ? ' has-data' : '') + (selectedMonth === m ? ' selected' : '');
+                card.onclick = () => selectMonth(m);
+                
+                card.innerHTML = `
+                    <div class="month-indicator"></div>
+                    <div class="month-name">${monthNames[m-1]}</div>
+                    <div class="month-summary">
+                        ${hasData ? `
+                            <div class="summary-row">
+                                <span class="summary-label">Masuk</span>
+                                <span class="summary-value income">+ ${formatCurrency(data.income)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Keluar</span>
+                                <span class="summary-value expense">- ${formatCurrency(data.expense)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Saldo</span>
+                                <span class="summary-value" style="color: ${data.balance >= 0 ? '#34D399' : '#F87171'}">
+                                    ${data.balance >= 0 ? '+' : ''} ${formatCurrency(data.balance)}
+                                </span>
+                            </div>
+                        ` : `
+                            <div class="summary-row">
+                                <span class="summary-label" style="color: #555;">Tidak ada transaksi</span>
+                            </div>
+                        `}
+                    </div>
+                `;
+                grid.appendChild(card);
+            }
+            
+            // Auto-select current month
+            if (!selectedMonth) {
+                const currentMonth = new Date().getMonth() + 1;
+                selectMonth(currentMonth);
+            } else {
+                selectMonth(selectedMonth);
+            }
+        }
+
+        function selectMonth(month) {
+            selectedMonth = month;
+            
+            // Update grid selection
+            document.querySelectorAll('.month-card').forEach((card, idx) => {
+                card.classList.toggle('selected', idx + 1 === month);
+            });
+            
+            // Render detail
+            const data = getMonthData(month, currentYear);
+            const detailTitle = document.getElementById('detailTitle');
+            const summaryCards = document.getElementById('detailSummaryCards');
+            const transactionList = document.getElementById('detailTransactionList');
+            
+            detailTitle.textContent = `Detail ${monthNames[month-1]} ${currentYear}`;
+            
+            summaryCards.innerHTML = `
+                <div class="detail-summary-card">
+                    <div class="label">Pemasukan</div>
+                    <div class="value income">+ ${formatCurrency(data.income)}</div>
+                </div>
+                <div class="detail-summary-card">
+                    <div class="label">Pengeluaran</div>
+                    <div class="value expense">- ${formatCurrency(data.expense)}</div>
+                </div>
+                <div class="detail-summary-card">
+                    <div class="label">Saldo</div>
+                    <div class="value" style="color: ${data.balance >= 0 ? '#34D399' : '#F87171'}">
+                        ${data.balance >= 0 ? '+' : ''} ${formatCurrency(data.balance)}
+                    </div>
+                </div>
+            `;
+            
+            if (data.transactions.length === 0) {
+                transactionList.innerHTML = '<div class="no-data">📭 Tidak ada transaksi di bulan ini</div>';
+            } else {
+                transactionList.innerHTML = data.transactions
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(t => `
+                        <div class="table-row">
+                            <div class="transaction-name-cell">
+                                <div class="transaction-dot ${t.type === 'pemasukan' ? 'income' : 'expense'}"></div>
+                                <div class="transaction-detail">
+                                    <div class="name">${t.name}</div>
+                                    <div class="category">${t.category}</div>
+                                </div>
+                            </div>
+                            <div class="transaction-date-cell">${t.displayDate}</div>
+                            <div><span class="transaction-category-tag">${t.kategori}</span></div>
+                            <div class="transaction-amount-cell ${t.type === 'pemasukan' ? 'income' : 'expense'}">
+                                ${t.type === 'pemasukan' ? '+' : '-'} ${formatCurrency(t.amount)}
+                            </div>
+                        </div>
+                    `).join('');
+            }
+        }
+
+        function changeYear(delta) {
+            currentYear += delta;
+            renderMonthGrid();
+        }
+
+        // ========== NAVIGATION ==========
+        function toggleSubmenu(parentItem, submenuId) {
+            const submenu = document.getElementById(submenuId);
+            const isCollapsed = submenu.classList.contains('collapsed');
+            if (isCollapsed) {
+                submenu.classList.remove('collapsed');
+                submenu.classList.add('expanded');
+                parentItem.classList.add('expanded');
+            } else {
+                submenu.classList.add('collapsed');
+                submenu.classList.remove('expanded');
+                parentItem.classList.remove('expanded');
+            }
+        }
+
+        function navigateTo(pageName, clickedItem, filterType = null) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageName).classList.add('active');
+            document.querySelectorAll('.menu-item.active').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.submenu-item.active').forEach(m => m.classList.remove('active'));
+            
+            if (clickedItem) {
+                clickedItem.classList.add('active');
+                if (clickedItem.classList.contains('submenu-item')) {
+                    const parentItem = clickedItem.closest('div').querySelector('.menu-item');
+                    if (parentItem) parentItem.classList.add('active');
+                }
+            }
+
+            if (pageName === 'transaksi' && filterType) {
+                currentFilterTransaksi = filterType;
+                document.querySelectorAll('#filterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+                const matchingTab = document.querySelector(`#filterTabs .filter-tab[data-filter="${filterType}"]`);
+                if (matchingTab) matchingTab.classList.add('active');
+                renderTransactionTable();
+            }
+        }
+
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMonthGrid();
+            // Dashboard initializations
+            if (document.getElementById('chartWrapper')) generateChart();
+            if (document.getElementById('dashboardRecentTransactions')) renderDashboardRecent();
+            if (document.getElementById('transactionTableBody')) renderTransactionTable();
+        });
+
+        // Include other necessary functions for dashboard & transaksi
+        let currentFilterTransaksi = 'semua';
+        let currentCategoryTransaksi = 'semua';
+        let currentSortTransaksi = 'terbaru';
+        let currentSearchTransaksi = '';
+
+        function getFilteredTransactions() {
+            let filtered = [...allTransactions];
+            if (currentFilterTransaksi === 'pemasukan') filtered = filtered.filter(t => t.type === 'pemasukan');
+            else if (currentFilterTransaksi === 'pengeluaran') filtered = filtered.filter(t => t.type === 'pengeluaran');
+            else if (currentFilterTransaksi === 'bulan-ini') filtered = filtered.filter(t => t.month === 7 && t.year === 2026);
+            else if (currentFilterTransaksi === 'minggu-ini') filtered = filtered.filter(t => ['2026-07-16','2026-07-17','2026-07-18','2026-07-19','2026-07-20'].includes(t.date));
+            if (currentCategoryTransaksi !== 'semua') filtered = filtered.filter(t => t.kategori === currentCategoryTransaksi);
+            if (currentSearchTransaksi) {
+                const s = currentSearchTransaksi.toLowerCase();
+                filtered = filtered.filter(t => t.name.toLowerCase().includes(s) || t.category.toLowerCase().includes(s) || t.kategori.toLowerCase().includes(s));
+            }
+            switch(currentSortTransaksi) {
+                case 'terbaru': filtered.sort((a,b) => new Date(b.date) - new Date(a.date)); break;
+                case 'terlama': filtered.sort((a,b) => new Date(a.date) - new Date(b.date)); break;
+                case 'terbesar': filtered.sort((a,b) => b.amount - a.amount); break;
+                case 'terkecil': filtered.sort((a,b) => a.amount - b.amount); break;
+                default: filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+            }
+            return filtered;
+        }
+
+        function renderTransactionTable() {
+            const filtered = getFilteredTransactions();
+            const tbody = document.getElementById('transactionTableBody');
+            const resultCount = document.getElementById('resultCount');
+            if (!tbody) return;
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<div class="no-data">🔍 Tidak ada transaksi ditemukan</div>';
+                if (resultCount) resultCount.textContent = '';
+            } else {
+                if (resultCount) resultCount.textContent = `Menampilkan ${filtered.length} transaksi`;
+                tbody.innerHTML = filtered.map(t => `
+                    <div class="table-row">
+                        <div class="transaction-name-cell"><div class="transaction-dot ${t.type==='pemasukan'?'income':'expense'}"></div><div class="transaction-detail"><div class="name">${t.name}</div><div class="category">${t.category}</div></div></div>
+                        <div class="transaction-date-cell">${t.displayDate}</div>
+                        <div><span class="transaction-category-tag">${t.kategori}</span></div>
+                        <div class="transaction-amount-cell ${t.type==='pemasukan'?'income':'expense'}">${t.type==='pemasukan'?'+':'-'} ${formatCurrency(t.amount)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderDashboardRecent() {
+            const container = document.getElementById('dashboardRecentTransactions');
+            if (!container) return;
+            const recent = [...allTransactions].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,4);
+            container.innerHTML = recent.map(t => `
+                <div class="transaction-item-dashboard">
+                    <div class="transaction-info"><div class="transaction-name">${t.name}</div><div class="transaction-date">${t.displayDate}</div></div>
+                    <div class="transaction-amount ${t.type==='pemasukan'?'income':'expense'}">${t.type==='pemasukan'?'+':'-'} ${formatCurrency(t.amount)}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateChart() {
+            const wrapper = document.getElementById('chartWrapper');
+            if (!wrapper) return;
+            const data = [{day:'Sen',value:450000,height:60},{day:'Sel',value:680000,height:85},{day:'Rab',value:320000,height:45},{day:'Kam',value:750000,height:95},{day:'Jum',value:520000,height:70},{day:'Sab',value:380000,height:50},{day:'Min',value:180000,height:30}];
+            const barsArea = document.createElement('div'); barsArea.className = 'chart-bars-area';
+            const labelsArea = document.createElement('div'); labelsArea.className = 'chart-labels';
+            data.forEach(d => {
+                const barCol = document.createElement('div'); barCol.className = 'chart-bar-col';
+                const bar = document.createElement('div'); bar.className = 'chart-bar-inner'; bar.style.height = '0px';
+                const vl = document.createElement('span'); vl.className = 'chart-bar-value'; vl.textContent = formatCurrency(d.value);
+                bar.appendChild(vl); barCol.appendChild(bar); barsArea.appendChild(barCol);
+                const li = document.createElement('div'); li.className = 'chart-label-item'; li.textContent = d.day; labelsArea.appendChild(li);
+                setTimeout(() => { bar.style.height = d.height + '%'; }, 100);
+            });
+            wrapper.appendChild(barsArea); wrapper.appendChild(labelsArea);
+        }
+
+        // Transaksi event listeners
+        document.querySelectorAll('#filterTabs .filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('#filterTabs .filter-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentFilterTransaksi = this.dataset.filter;
+                renderTransactionTable();
+            });
+        });
+        document.getElementById('categoryFilter')?.addEventListener('change', function() { currentCategoryTransaksi = this.value; renderTransactionTable(); });
+        document.getElementById('sortFilter')?.addEventListener('change', function() { currentSortTransaksi = this.value; renderTransactionTable(); });
+        document.getElementById('searchInput')?.addEventListener('input', function() { currentSearchTransaksi = this.value; renderTransactionTable(); });
+    </script>
+
+</body>
+</html>
